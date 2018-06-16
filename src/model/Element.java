@@ -10,7 +10,7 @@ public class Element {
     public final static int FILE = 2;
     
     private final int type;
-    private String name;
+    protected String name;
     private String creationDateTime;
     private String modifiedDateTime;
 

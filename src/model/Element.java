@@ -20,6 +20,10 @@ public class Element {
         this.creationDateTime = creationDateTime;
         this.modifiedDateTime = creationDateTime;
     }
+    
+    public int getType() {
+        return this.type;
+    }
 
     public String getName() {
         return name;

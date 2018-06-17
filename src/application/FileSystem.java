@@ -9,6 +9,7 @@ import java.util.Stack;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import model.Directory;
+import model.File;
 
 /**
  *
@@ -24,7 +25,7 @@ public class FileSystem {
     private final int sectorCount;
     private final int sectorSize;
     private final Directory root;
-    private final Stack directoryStack;
+    private final Stack<Directory> directoryStack;
 
     public FileSystem(String filePath, int sectorCount, int sectorSize) {
         this.filePath = filePath;
@@ -49,15 +50,48 @@ public class FileSystem {
         }
     }
     
+    private Directory getCurrentDirectory() {
+        return this.directoryStack.peek();
+    }
+    
+    private void popDirectory() {
+        this.directoryStack.pop();
+        if (this.directoryStack.empty()) {
+            this.directoryStack.push(this.root);
+        }
+    }
+    
     public void makeDirectory(String dirName) {
-        
+        Directory currentDirectory = getCurrentDirectory();
+        if (!currentDirectory.existsElement(dirName)) {
+            Directory newDirectory = new Directory(dirName, DateTime.now());
+            currentDirectory.addDirectory(newDirectory);
+        }
     }
     
     public void changeDirectory(String dirName) {
-        
+        if (dirName.equals("..")) {
+            popDirectory();
+        } else {
+            Directory currentDirectory = getCurrentDirectory();
+            for (Directory directory: currentDirectory.getDirectories()) {
+                if (directory.getName().equals(dirName)) {
+                    this.directoryStack.push(directory);
+                    break;
+                }
+            }
+        }
     }
     
     public ArrayList<String> listDirectories() {
-        
+        ArrayList<String> elementList = new ArrayList<>();
+        Directory currentDirectory = getCurrentDirectory();
+        for (Directory directory: currentDirectory.getDirectories()) {
+            elementList.add(directory.getName() + "-DIR");
+        }
+        for (File file: currentDirectory.getFiles()) {
+            elementList.add(file.getName() + "-FILE");
+        }
+        return elementList;
     }
 }

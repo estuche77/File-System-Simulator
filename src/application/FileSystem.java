@@ -63,30 +63,35 @@ public class FileSystem {
         }
     }
     
-    public ArrayList<Integer> findAvailableSectors() {
-        ArrayList<Integer> emptySectors = new ArrayList<>();
-        
+    private char[] getFileSystemDisk() {
+        char characters[] = null;
         try (FileReader fr = new FileReader(this.filePath)) {
-            char []characters = new char[this.sectorCount * this.sectorSize];
+            characters = new char[this.sectorCount * this.sectorSize];
             fr.read(characters);
-            
-            for (int i = 0; i < this.sectorCount; i++) {
-                for (int j = 0; j < this.sectorSize; j++) {
-                    // Formula taken from:
-                    // https://stackoverflow.com/questions/14015556/how-to-map-the-indexes-of-a-matrix-to-a-1-dimensional-array-c
-                    if (characters[i*sectorSize+j] == NULL_CHAR) {
-                        emptySectors.add(i);
-                        break;
-                    }
-                }
-            }
-            
-            fr.close();
         } catch (FileNotFoundException ex) {
             Logger.getLogger(FileSystem.class.getName()).log(Level.SEVERE, null, ex);
         } catch (IOException ex) {
             Logger.getLogger(FileSystem.class.getName()).log(Level.SEVERE, null, ex);
         }
+        return characters;
+    }
+    
+    public ArrayList<Integer> findAvailableSectors() {
+        ArrayList<Integer> emptySectors = new ArrayList<>();
+        
+        char characters[] = getFileSystemDisk();
+        
+        for (int i = 0; i < this.sectorCount; i++) {
+            for (int j = 0; j < this.sectorSize; j++) {
+                // Formula taken from:
+                // https://stackoverflow.com/questions/14015556/how-to-map-the-indexes-of-a-matrix-to-a-1-dimensional-array-c
+                if (characters[i*sectorSize+j] == NULL_CHAR) {
+                    emptySectors.add(i);
+                    break;
+                }
+            }
+        }
+        
         return emptySectors;
     }
     

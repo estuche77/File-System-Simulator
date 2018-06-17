@@ -1,6 +1,8 @@
 package application;
 
 import core.DateTime;
+import java.io.FileNotFoundException;
+import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
@@ -34,7 +36,7 @@ public class FileSystem {
         this.root = new Directory(DEFAULT_NAME, DateTime.now());
         this.directoryStack = new Stack();
         this.directoryStack.push(this.root);
-        this.createFileSystemDisk();
+        // this.createFileSystemDisk();
     }
     
     private void createFileSystemDisk() {
@@ -59,6 +61,33 @@ public class FileSystem {
         if (this.directoryStack.empty()) {
             this.directoryStack.push(this.root);
         }
+    }
+    
+    public ArrayList<Integer> findEmptySectors() {
+        ArrayList<Integer> emptySectors = new ArrayList<>();
+        
+        try (FileReader fr = new FileReader(this.filePath)) {
+            char []characters = new char[this.sectorCount * this.sectorSize];
+            fr.read(characters);
+            
+            for (int i = 0; i < this.sectorCount; i++) {
+                for (int j = 0; j < this.sectorSize; j++) {
+                    // Formula taken from:
+                    // https://stackoverflow.com/questions/14015556/how-to-map-the-indexes-of-a-matrix-to-a-1-dimensional-array-c
+                    if (characters[i*sectorSize+j] == NULL_CHAR) {
+                        emptySectors.add(i);
+                        break;
+                    }
+                }
+            }
+            
+            fr.close();
+        } catch (FileNotFoundException ex) {
+            Logger.getLogger(FileSystem.class.getName()).log(Level.SEVERE, null, ex);
+        } catch (IOException ex) {
+            Logger.getLogger(FileSystem.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return emptySectors;
     }
     
     public void makeDirectory(String dirName) {

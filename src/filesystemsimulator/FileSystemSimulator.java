@@ -45,5 +45,10 @@ public class FileSystemSimulator {
         for (String s: list) {
             System.out.println(s);
         }
+        
+        ArrayList<Integer> sectors = fs.findAvailableSectors();
+        for (int s: sectors) {
+            System.out.println(s);
+        }
     }
 }

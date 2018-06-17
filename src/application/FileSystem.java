@@ -63,7 +63,7 @@ public class FileSystem {
         }
     }
     
-    public ArrayList<Integer> findEmptySectors() {
+    public ArrayList<Integer> findAvailableSectors() {
         ArrayList<Integer> emptySectors = new ArrayList<>();
         
         try (FileReader fr = new FileReader(this.filePath)) {

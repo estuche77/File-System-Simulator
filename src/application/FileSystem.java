@@ -228,6 +228,7 @@ public class FileSystem {
             }
         }
         file.setSize(i);
+        file.setModifiedDateTime(DateTime.now());
         
         writeFileSystemDisk(data);
     }

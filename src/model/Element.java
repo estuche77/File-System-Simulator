@@ -37,10 +37,6 @@ public class Element {
         return creationDateTime;
     }
 
-    public void setCreationDateTime(String creationDateTime) {
-        this.creationDateTime = creationDateTime;
-    }
-
     public String getModifiedDateTime() {
         return modifiedDateTime;
     }

@@ -1,7 +1,11 @@
 package filesystemsimulator;
 
 import application.FileSystem;
+import java.util.ArrayList;
 import javax.swing.tree.DefaultMutableTreeNode;
+import javax.swing.tree.DefaultTreeModel;
+import model.Directory;
+import model.File;
 
 /**
  *
@@ -10,6 +14,8 @@ import javax.swing.tree.DefaultMutableTreeNode;
 public class FileSystemSimulatorGUI extends javax.swing.JFrame {
     
     private static final String FILE_PATH = "./FileSystem.txt";
+    private static final int SECTOR_COUNT = 10;
+    private static final int SECTOR_SIZE = 10;
     
     private final FileSystem fs;
 
@@ -18,7 +24,9 @@ public class FileSystemSimulatorGUI extends javax.swing.JFrame {
      */
     public FileSystemSimulatorGUI() {
         initComponents();
-        this.fs = new FileSystem(FILE_PATH, 10, 10);
+        this.fs = new FileSystem(FILE_PATH, SECTOR_COUNT, SECTOR_SIZE);
+        fillFileSystem();
+        updateTree();
     }
     
     private void fillFileSystem() {
@@ -26,10 +34,32 @@ public class FileSystemSimulatorGUI extends javax.swing.JFrame {
         fs.makeDirectory("Dogs");
         fs.makeDirectory("Horses");
         fs.makeDirectory("Don't open");
+        fs.changeDirectory("Don't open");
+        fs.makeDirectory("Why?");
     }
     
     private void updateTree() {
-        DefaultMutableTreeNode root = new DefaultMutableTreeNode();
+        DefaultTreeModel model = (DefaultTreeModel) this.fileTree.getModel();
+        model.setRoot(updateTree(this.fs.getRoot()));
+    }
+    
+    private DefaultMutableTreeNode updateTree(Directory directory) {
+        DefaultMutableTreeNode root = new DefaultMutableTreeNode(directory.getName());
+        
+        ArrayList<Directory> directories = directory.getDirectories();
+        
+        for (Directory dir: directories) {
+            DefaultMutableTreeNode node = updateTree(dir);
+            root.add(node);
+        }
+        
+        ArrayList<File> files = directory.getFiles();
+        
+        for (File file: files) {
+            root.add(new DefaultMutableTreeNode(file.getName()));
+        }
+        
+        return root;
     }
     
     /**
@@ -61,6 +91,7 @@ public class FileSystemSimulatorGUI extends javax.swing.JFrame {
         fileTable = new javax.swing.JTable();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
+        setBackground(new java.awt.Color(255, 255, 255));
 
         backButton.setText("Back");
 
@@ -86,7 +117,7 @@ public class FileSystemSimulatorGUI extends javax.swing.JFrame {
         previewTextArea.setRows(5);
         jScrollPane1.setViewportView(previewTextArea);
 
-        javax.swing.tree.DefaultMutableTreeNode treeNode1 = new javax.swing.tree.DefaultMutableTreeNode("C:");
+        javax.swing.tree.DefaultMutableTreeNode treeNode1 = new javax.swing.tree.DefaultMutableTreeNode("root");
         fileTree.setModel(new javax.swing.tree.DefaultTreeModel(treeNode1));
         jScrollPane2.setViewportView(fileTree);
 

@@ -124,6 +124,10 @@ public class FileSystem {
         return emptySectors;
     }
     
+    public Directory getRoot() {
+        return this.root;
+    }
+    
     public ArrayList<Integer> findAvailableSectorsHARD() {
         ArrayList<Integer> emptySectors = new ArrayList<>();
         

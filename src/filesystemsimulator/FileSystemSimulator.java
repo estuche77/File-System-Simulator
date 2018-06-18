@@ -20,11 +20,19 @@ public class FileSystemSimulator {
         }
         
         fs.makeDirectory("Hola");
+        fs.changeDirectory("Hola");
         
-        list = fs.listDirectories();
-        for (String s: list) {
-            System.out.println(s);
-        }
+        fs.makeDirectory("Hola1");
+        fs.changeDirectory("Hola1");
+        
+        fs.makeDirectory("Hola2");
+        fs.changeDirectory("Hola2");
+        
+        fs.makeDirectory("Hola2");
+        
+        fs.makeDirectory("Hola3");
+        
+        fs.makeDirectory("Hola4");
         
         fs.createFile("test.txt");
         fs.writeFile("test.txt", "Test file content");
@@ -39,5 +47,23 @@ public class FileSystemSimulator {
         
         System.out.println(fs.readFile("test.txt"));
         System.out.println(fs.readFile("test2.txt"));
+        
+        fs.changeDirectory("..");
+        
+        fs.changeDirectory("..");
+        
+        fs.changeDirectory("..");
+        
+        list = fs.listDirectories();
+        for (String s: list) {
+            System.out.println(s);
+        }
+        
+        fs.deleteDirectory("Hola");
+        
+        list = fs.listDirectories();
+        for (String s: list) {
+            System.out.println(s);
+        }
     }
 }

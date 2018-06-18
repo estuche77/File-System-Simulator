@@ -9,9 +9,19 @@ import java.util.Stack;
  */
 public class File extends Element {
     private final Stack<Integer> linkedSectors = new Stack();
+    private int size;
 
     public File(String name, String creationDateTime) {
         super(Element.FILE, name, creationDateTime);
+        this.size = 0;
+    }
+
+    public int getSize() {
+        return size;
+    }
+
+    public void setSize(int size) {
+        this.size = size;
     }
     
     public void allocateSector(int sector) {

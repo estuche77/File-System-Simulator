@@ -21,7 +21,6 @@ import model.File;
 public class FileSystem {
     
     private final static String DEFAULT_NAME = "C:";
-    private final static char EMPTY_CHAR = '@';
     private final static char NULL_CHAR = '#';
     
     private final String filePath;
@@ -228,7 +227,27 @@ public class FileSystem {
                 i++;
             }
         }
+        file.setSize(i);
         
         writeFileSystemDisk(data);
     }
+    
+    public String readFile(String fileName) {
+        String string = new String();
+        Directory currentDirectory = getCurrentDirectory();
+        File file = currentDirectory.getFile(fileName);
+        
+        ArrayList<Integer> sectors = file.getSectors();
+        char data[] = getFileSystemDisk();
+        int i = 0;
+        for (int sector: sectors) {
+            for (int offset = 0; offset < this.sectorSize && i < file.getSize(); offset++) {
+                string += data[sector*sectorSize+offset];
+                i++;
+            }
+        }
+        return string;
+    }
+    
+    
 }

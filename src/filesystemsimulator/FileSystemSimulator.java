@@ -29,7 +29,15 @@ public class FileSystemSimulator {
         fs.createFile("test.txt");
         fs.writeFile("test.txt", "Test file content");
         
+        System.out.println(fs.readFile("test.txt"));
+        
+        fs.createFile("test.txt");
+        fs.writeFile("test.txt", "hola");
+        
         fs.createFile("test2.txt");
-        fs.writeFile("test2.txt", "2");
+        fs.writeFile("test2.txt", "adios");
+        
+        System.out.println(fs.readFile("test.txt"));
+        System.out.println(fs.readFile("test2.txt"));
     }
 }

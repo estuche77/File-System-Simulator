@@ -26,30 +26,10 @@ public class FileSystemSimulator {
             System.out.println(s);
         }
         
-        fs.changeDirectory("Hola");
+        fs.createFile("test.txt");
+        fs.writeFile("test.txt", "Test file content");
         
-        list = fs.listDirectories();
-        for (String s: list) {
-            System.out.println(s);
-        }
-        
-        fs.makeDirectory("Bye");
-        
-        list = fs.listDirectories();
-        for (String s: list) {
-            System.out.println(s);
-        }
-        
-        fs.changeDirectory("..");
-        
-        list = fs.listDirectories();
-        for (String s: list) {
-            System.out.println(s);
-        }
-        
-        ArrayList<Integer> sectors = fs.findAvailableSectorsHARD();
-        for (int s: sectors) {
-            System.out.println(s);
-        }
+        fs.createFile("test2.txt");
+        fs.writeFile("test2.txt", "2");
     }
 }

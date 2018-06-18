@@ -80,6 +80,17 @@ public class FileSystem {
         return characters;
     }
     
+    private void writeFileSystemDisk(char data[]) {
+        try (PrintWriter out = new PrintWriter(new FileWriter(this.filePath))) {
+            for (int i = 0; i < this.sectorCount * this.sectorSize; i++) {
+                out.print(data[i]);
+            }
+            out.close();
+        } catch (IOException ex) {
+            Logger.getLogger(FileSystem.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
     private int freeSectors() {
         int count = 0;
         for (int i = 0; i < this.sectorCount; i++) {
@@ -207,5 +218,17 @@ public class FileSystem {
                 this.deallocateSector(file.deallocateLastSector());
             }
         }
+        
+        ArrayList<Integer> sectors = file.getSectors();
+        char data[] = getFileSystemDisk();
+        int i = 0;
+        for (int sector: sectors) {
+            for (int offset = 0; offset < this.sectorSize && i < content.length(); offset++) {
+                data[sector*sectorSize+offset] = content.charAt(i);
+                i++;
+            }
+        }
+        
+        writeFileSystemDisk(data);
     }
 }

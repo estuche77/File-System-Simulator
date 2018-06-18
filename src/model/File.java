@@ -1,5 +1,6 @@
 package model;
 
+import java.util.ArrayList;
 import java.util.Stack;
 
 /**
@@ -23,6 +24,10 @@ public class File extends Element {
     
     public int assignedSectors() {
         return this.linkedSectors.size();
+    }
+    
+    public ArrayList<Integer> getSectors() {
+        return new ArrayList(this.linkedSectors);
     }
     
     public String getFileExtension() {

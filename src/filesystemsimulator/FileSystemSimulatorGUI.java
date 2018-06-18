@@ -1,23 +1,37 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package filesystemsimulator;
+
+import application.FileSystem;
+import javax.swing.tree.DefaultMutableTreeNode;
 
 /**
  *
  * @author estuche
  */
 public class FileSystemSimulatorGUI extends javax.swing.JFrame {
+    
+    private static final String FILE_PATH = "./FileSystem.txt";
+    
+    private final FileSystem fs;
 
     /**
      * Creates new form FileSystemSimulatorGUI
      */
     public FileSystemSimulatorGUI() {
         initComponents();
+        this.fs = new FileSystem(FILE_PATH, 10, 10);
     }
-
+    
+    private void fillFileSystem() {
+        fs.makeDirectory("Cats");
+        fs.makeDirectory("Dogs");
+        fs.makeDirectory("Horses");
+        fs.makeDirectory("Don't open");
+    }
+    
+    private void updateTree() {
+        DefaultMutableTreeNode root = new DefaultMutableTreeNode();
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -72,19 +86,33 @@ public class FileSystemSimulatorGUI extends javax.swing.JFrame {
         previewTextArea.setRows(5);
         jScrollPane1.setViewportView(previewTextArea);
 
+        javax.swing.tree.DefaultMutableTreeNode treeNode1 = new javax.swing.tree.DefaultMutableTreeNode("C:");
+        fileTree.setModel(new javax.swing.tree.DefaultTreeModel(treeNode1));
         jScrollPane2.setViewportView(fileTree);
 
         fileTable.setModel(new javax.swing.table.DefaultTableModel(
             new Object [][] {
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null},
-                {null, null, null, null}
+
             },
             new String [] {
-                "Title 1", "Title 2", "Title 3", "Title 4"
+                "Name", "Date modified", "Type", "Size"
             }
-        ));
+        ) {
+            Class[] types = new Class [] {
+                java.lang.String.class, java.lang.String.class, java.lang.String.class, java.lang.String.class
+            };
+            boolean[] canEdit = new boolean [] {
+                false, false, false, false
+            };
+
+            public Class getColumnClass(int columnIndex) {
+                return types [columnIndex];
+            }
+
+            public boolean isCellEditable(int rowIndex, int columnIndex) {
+                return canEdit [columnIndex];
+            }
+        });
         jScrollPane3.setViewportView(fileTable);
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -156,10 +184,6 @@ public class FileSystemSimulatorGUI extends javax.swing.JFrame {
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
-
-    /**
-     * @param args the command line arguments
-     */
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
@@ -185,10 +209,8 @@ public class FileSystemSimulatorGUI extends javax.swing.JFrame {
         //</editor-fold>
 
         /* Create and display the form */
-        java.awt.EventQueue.invokeLater(new Runnable() {
-            public void run() {
-                new FileSystemSimulatorGUI().setVisible(true);
-            }
+        java.awt.EventQueue.invokeLater(() -> {
+            new FileSystemSimulatorGUI().setVisible(true);
         });
     }
 

@@ -44,5 +44,4 @@ public class Element {
     public void setModifiedDateTime(String modifiedDateTime) {
         this.modifiedDateTime = modifiedDateTime;
     }
-    
 }

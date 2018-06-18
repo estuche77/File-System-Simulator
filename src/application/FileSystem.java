@@ -250,5 +250,37 @@ public class FileSystem {
         return string;
     }
     
+    public void deleteFile(String fileName) {
+        Directory currentDirectory = getCurrentDirectory();
+        File file = currentDirectory.getFile(fileName);
+        
+        ArrayList<Integer> sectors = file.getSectors();
+        for (int sector: sectors) {
+            this.deallocateSector(sector);
+        }
+        
+        currentDirectory.deleteElement(fileName);
+    }
     
+    public void deleteDirectory(String dirName) {
+        Directory currentDirectory = getCurrentDirectory();
+        Directory toDelete = currentDirectory.getDirectory(dirName);
+        
+        changeDirectory(toDelete.getName());
+        
+        ArrayList<Directory> directories = toDelete.getDirectories();
+        
+        for (Directory d: directories) {
+            deleteDirectory(d.getName());
+        }
+        
+        ArrayList<File> files = toDelete.getFiles();
+        
+        for (File f: files) {
+            deleteFile(f.getName());
+        }
+        
+        changeDirectory("..");
+        currentDirectory.deleteElement(dirName);
+    }
 }

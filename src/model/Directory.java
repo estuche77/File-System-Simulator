@@ -25,6 +25,14 @@ public class Directory extends Element {
         elements.add(file);
     }
     
+    public void deleteElement(String fileName) {
+        for (Element e: this.elements) {
+            if (e.getName().equals(fileName)) {
+                this.elements.remove(e);
+            }
+        }
+    }
+    
     public boolean existsElement(String elementName) {
         for (Element e: this.elements) {
             if (e.getName().equals(elementName)) {
@@ -52,6 +60,15 @@ public class Directory extends Element {
             }
         }
         return files;
+    }
+    
+    public Directory getDirectory(String dirName) {
+        for (Element e: this.elements) {
+            if (e.getType() == Element.DIRECTORY && e.getName().equals(dirName)) {
+                return (Directory)e;
+            }
+        }
+        return null;
     }
     
     public File getFile(String fileName) {

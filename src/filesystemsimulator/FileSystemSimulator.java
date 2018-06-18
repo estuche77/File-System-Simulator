@@ -10,6 +10,7 @@ import java.util.ArrayList;
 public class FileSystemSimulator {
 
     public static void main(String[] args) {
+        
         FileSystem fs = new FileSystem("./test.txt", 5, 5);
         ArrayList<String> list;
         
@@ -46,7 +47,7 @@ public class FileSystemSimulator {
             System.out.println(s);
         }
         
-        ArrayList<Integer> sectors = fs.findAvailableSectors();
+        ArrayList<Integer> sectors = fs.findAvailableSectorsHARD();
         for (int s: sectors) {
             System.out.println(s);
         }

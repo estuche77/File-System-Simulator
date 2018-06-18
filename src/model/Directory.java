@@ -53,4 +53,13 @@ public class Directory extends Element {
         }
         return files;
     }
+    
+    public File getFile(String fileName) {
+        for (Element e: this.elements) {
+            if (e.getType() == Element.FILE && e.getName().equals(fileName)) {
+                return (File)e;
+            }
+        }
+        return null;
+    }
 }

@@ -1,16 +1,28 @@
 package model;
 
-import java.util.ArrayList;
+import java.util.Stack;
 
 /**
  *
  * @author estuche
  */
 public class File extends Element {
-    private final ArrayList<Integer> linkedSectors = new ArrayList<>();
+    private final Stack<Integer> linkedSectors = new Stack();
 
     public File(String name, String creationDateTime) {
         super(Element.FILE, name, creationDateTime);
+    }
+    
+    public void allocateSector(int sector) {
+        this.linkedSectors.push(sector);
+    }
+    
+    public int deallocateLastSector() {
+        return this.linkedSectors.pop();
+    }
+    
+    public int assignedSectors() {
+        return this.linkedSectors.size();
     }
     
     public String getFileExtension() {

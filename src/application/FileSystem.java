@@ -7,6 +7,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Stack;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -27,6 +28,7 @@ public class FileSystem {
     private final int sectorCount;
     private final int sectorSize;
     private final Directory root;
+    private final boolean[] availability;
     private final Stack<Directory> directoryStack;
 
     public FileSystem(String filePath, int sectorCount, int sectorSize) {
@@ -34,9 +36,11 @@ public class FileSystem {
         this.sectorCount = sectorCount;
         this.sectorSize = sectorSize;
         this.root = new Directory(DEFAULT_NAME, DateTime.now());
+        this.availability = new boolean[this.sectorCount * this.sectorSize];
+        Arrays.fill(this.availability, true);
         this.directoryStack = new Stack();
         this.directoryStack.push(this.root);
-        // this.createFileSystemDisk();
+        this.createFileSystemDisk();
     }
     
     private void createFileSystemDisk() {
@@ -76,7 +80,41 @@ public class FileSystem {
         return characters;
     }
     
-    public ArrayList<Integer> findAvailableSectors() {
+    private int freeSectors() {
+        int count = 0;
+        for (int i = 0; i < this.sectorCount; i++) {
+            if (this.availability[i]) {
+                count++;
+            }
+        }
+        return count;
+    }
+    
+    private int allocateNextFreeSector() {
+        for (int i = 0; i < this.sectorCount; i++) {
+            if (this.availability[i]) {
+                this.availability[i] = false;
+                return i;
+            }
+        }
+        return -1;
+    }
+    
+    private void deallocateSector(int sector) {
+        this.availability[sector] = true;
+    }
+    
+    private ArrayList<Integer> findAvailableSectors() {
+        ArrayList<Integer> emptySectors = new ArrayList<>();
+        for (int i = 0; i < this.sectorCount; i++) {
+            if (this.availability[i]) {
+                emptySectors.add(i);
+            }
+        }
+        return emptySectors;
+    }
+    
+    public ArrayList<Integer> findAvailableSectorsHARD() {
         ArrayList<Integer> emptySectors = new ArrayList<>();
         
         char characters[] = getFileSystemDisk();
@@ -87,8 +125,9 @@ public class FileSystem {
                 // https://stackoverflow.com/questions/14015556/how-to-map-the-indexes-of-a-matrix-to-a-1-dimensional-array-c
                 if (characters[i*sectorSize+j] == NULL_CHAR) {
                     emptySectors.add(i);
-                    break;
                 }
+                // This line should be removed later
+                break;
             }
         }
         
@@ -127,5 +166,46 @@ public class FileSystem {
             elementList.add(file.getName() + "-FILE");
         }
         return elementList;
+    }
+    
+    public void createFile(String fileName) {
+        Directory currentDirectory = getCurrentDirectory();
+        if (!currentDirectory.existsElement(fileName)) {
+            File newFile = new File(fileName, DateTime.now());
+            
+            if (this.freeSectors() > 0) {
+                int firstSector = allocateNextFreeSector();
+                newFile.allocateSector(firstSector);
+                currentDirectory.addFile(newFile);
+            }
+        }
+    }
+    
+    public void writeFile(String fileName, String content) {
+        
+        Directory currentDirectory = getCurrentDirectory();
+        File file = currentDirectory.getFile(fileName);
+        
+        int neededSectors = (int)Math.ceil((float)content.length() / (float)sectorSize);
+        int asignedSectors = file.assignedSectors();
+        int difference = neededSectors - asignedSectors;
+        
+        if (difference > this.freeSectors()) {
+            // No free space
+            return;
+        }
+
+        // More sectors are needed
+        if (difference > 0) {
+            for (int i = 0; i < difference; i++) {
+                file.allocateSector(this.allocateNextFreeSector());
+            }
+        }
+        // Less sectors are needed
+        else if (difference < 0) {
+            for (int i = 0; i > difference; i--) {
+                this.deallocateSector(file.deallocateLastSector());
+            }
+        }
     }
 }

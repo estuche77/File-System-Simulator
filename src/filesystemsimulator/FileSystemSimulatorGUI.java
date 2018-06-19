@@ -21,6 +21,7 @@ import javax.swing.table.TableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import model.Directory;
+import model.Element;
 import model.File;
 
 /**
@@ -38,6 +39,10 @@ public class FileSystemSimulatorGUI extends javax.swing.JFrame {
     private String currentFile;
     private String clipBoardFile;
     private String clipboard;
+    
+    private Element elementClipboard;
+    
+    private boolean copy = true;
 
     /**
      * Creates new form FileSystemSimulatorGUI
@@ -420,10 +425,22 @@ public class FileSystemSimulatorGUI extends javax.swing.JFrame {
         this.clipBoardFile = (String) model.getValueAt(fileTable.getSelectedRow(), 0);
         this.clipboard = this.fs.readFile(clipBoardFile);
         this.pasteButton.setEnabled(true);
+        this.copy = true;
     }//GEN-LAST:event_copyVirtualVirtualButtonActionPerformed
 
     private void moveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_moveButtonActionPerformed
-        // TODO add your handling code here:
+        TableModel model = this.fileTable.getModel();
+        String name = (String) model.getValueAt(fileTable.getSelectedRow(), 0);
+        this.elementClipboard = this.fs.getCurrentDirectory().cutElement(name);
+        if (this.elementClipboard == null) {
+            this.pasteButton.setEnabled(false);
+            return;
+        }
+        this.pasteButton.setEnabled(true);
+        this.copy = false;
+        
+        this.updateTable(this.fs.getCurrentDirectory());
+        this.updateTree();
     }//GEN-LAST:event_moveButtonActionPerformed
 
     private void deleteButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteButtonActionPerformed
@@ -457,8 +474,12 @@ public class FileSystemSimulatorGUI extends javax.swing.JFrame {
     }//GEN-LAST:event_cancelButtonActionPerformed
 
     private void pasteButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pasteButtonActionPerformed
-        this.fs.createFile(this.clipBoardFile);
-        this.fs.writeFile(this.clipBoardFile, this.clipboard);
+        if (copy) {
+            this.fs.createFile(this.clipBoardFile);
+            this.fs.writeFile(this.clipBoardFile, this.clipboard);
+        } else {
+            this.fs.getCurrentDirectory().pasteElement(elementClipboard);
+        }
         
         this.updateTable(this.fs.getCurrentDirectory());
         this.updateTree();

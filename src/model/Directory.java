@@ -79,4 +79,19 @@ public class Directory extends Element {
         }
         return null;
     }
+    
+    public Element cutElement(String fileName) {
+        for (int i = 0; i < this.elements.size(); i++) {
+            if (this.elements.get(i).getName().equals(fileName)) {
+                Element e = this.elements.get(i);
+                this.elements.remove(i);
+                return e;
+            }
+        }
+        return null;
+    }
+    
+    public void pasteElement(Element element) {
+        this.elements.add(element);
+    }
 }

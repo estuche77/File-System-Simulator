@@ -4,7 +4,15 @@ import application.FileSystem;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.JTable;
@@ -26,6 +34,10 @@ public class FileSystemSimulatorGUI extends javax.swing.JFrame {
     private static final int SECTOR_SIZE = 10;
     
     private final FileSystem fs;
+    
+    private String currentFile;
+    private String clipBoardFile;
+    private String clipboard;
 
     /**
      * Creates new form FileSystemSimulatorGUI
@@ -35,7 +47,7 @@ public class FileSystemSimulatorGUI extends javax.swing.JFrame {
         this.fs = new FileSystem(FILE_PATH, SECTOR_COUNT, SECTOR_SIZE);
         fillFileSystem();
         updateTree();
-        updateTable(this.fs.getRoot());
+        updateTable(this.fs.getCurrentDirectory());
         
         // Taken from StackOverflow:
         // https://stackoverflow.com/questions/14852719/double-click-listener-on-jtable-in-java/19586049#19586049
@@ -47,9 +59,27 @@ public class FileSystemSimulatorGUI extends javax.swing.JFrame {
                 int row = table.rowAtPoint(point);
                 if (mouseEvent.getClickCount() == 2 && table.getSelectedRow() != -1) {
                     TableModel model = table.getModel();
-                    String path = (String) model.getValueAt(row, 0);
-                    fs.changeDirectory(path);
+                    String directory = (String) model.getValueAt(row, 0);
+                    fs.changeDirectory(directory);
                     updateTable(fs.getCurrentDirectory());
+                }
+                else if (mouseEvent.getClickCount() == 1 && table.getSelectedRow() != -1) {
+                    TableModel model = table.getModel();
+                    currentFile = (String) model.getValueAt(row, 0);
+                    String content = fs.readFile(currentFile);
+                    
+                    if (content == null) {
+                        previewTextArea.setText("");
+                        previewTextArea.setEnabled(false);
+                        saveButton.setEnabled(false);
+                        cancelButton.setEnabled(false);
+                    }
+                    else {
+                        previewTextArea.setEnabled(true);
+                        saveButton.setEnabled(true);
+                        cancelButton.setEnabled(true);
+                        previewTextArea.setText(content);
+                    }
                 }
             }
         });
@@ -62,6 +92,7 @@ public class FileSystemSimulatorGUI extends javax.swing.JFrame {
         fs.makeDirectory("Don't open");
         fs.changeDirectory("Don't open");
         fs.makeDirectory("Why?");
+        fs.changeDirectory("..");
     }
     
     private void updateTree() {
@@ -105,6 +136,24 @@ public class FileSystemSimulatorGUI extends javax.swing.JFrame {
         }
     }
     
+    private String readFile(String path) {
+        try {
+            byte[] encoded = Files.readAllBytes(Paths.get(path));
+            return new String(encoded, StandardCharsets.UTF_8);
+        } catch (IOException ex) {
+            Logger.getLogger(FileSystemSimulatorGUI.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return null;
+    }
+    
+    private void writeFile(String path, String content) {
+        try (PrintWriter out = new PrintWriter(path)) {
+            out.println(content);
+        } catch (IOException ex) {
+            Logger.getLogger(FileSystem.class.getName()).log(Level.SEVERE, null, ex);
+        }
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -124,7 +173,7 @@ public class FileSystemSimulatorGUI extends javax.swing.JFrame {
         copyVirtualVirtualButton = new javax.swing.JButton();
         moveButton = new javax.swing.JButton();
         deleteButton = new javax.swing.JButton();
-        jButton8 = new javax.swing.JButton();
+        cancelButton = new javax.swing.JButton();
         saveButton = new javax.swing.JButton();
         jScrollPane1 = new javax.swing.JScrollPane();
         previewTextArea = new javax.swing.JTextArea();
@@ -132,6 +181,7 @@ public class FileSystemSimulatorGUI extends javax.swing.JFrame {
         fileTree = new javax.swing.JTree();
         jScrollPane3 = new javax.swing.JScrollPane();
         fileTable = new javax.swing.JTable();
+        pasteButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setBackground(new java.awt.Color(255, 255, 255));
@@ -192,9 +242,19 @@ public class FileSystemSimulatorGUI extends javax.swing.JFrame {
             }
         });
 
-        jButton8.setText("Cancel");
+        cancelButton.setText("Cancel");
+        cancelButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                cancelButtonActionPerformed(evt);
+            }
+        });
 
         saveButton.setText("Save");
+        saveButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                saveButtonActionPerformed(evt);
+            }
+        });
 
         previewTextArea.setColumns(20);
         previewTextArea.setRows(5);
@@ -229,6 +289,13 @@ public class FileSystemSimulatorGUI extends javax.swing.JFrame {
         });
         jScrollPane3.setViewportView(fileTable);
 
+        pasteButton.setText("Paste");
+        pasteButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                pasteButtonActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -252,19 +319,21 @@ public class FileSystemSimulatorGUI extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(moveButton, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(pasteButton)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(deleteButton)
                         .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 116, Short.MAX_VALUE)
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 215, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jButton8, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE)
+                        .addComponent(cancelButton, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(saveButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 175, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 275, Short.MAX_VALUE)
                     .addComponent(searchTextField))
                 .addContainerGap())
         );
@@ -291,9 +360,10 @@ public class FileSystemSimulatorGUI extends javax.swing.JFrame {
                         .addComponent(copyVirtualRealButton)
                         .addComponent(copyVirtualVirtualButton)
                         .addComponent(moveButton)
+                        .addComponent(pasteButton)
                         .addComponent(deleteButton))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                        .addComponent(jButton8)
+                        .addComponent(cancelButton)
                         .addComponent(saveButton))))
         );
 
@@ -320,8 +390,15 @@ public class FileSystemSimulatorGUI extends javax.swing.JFrame {
         int result = fileChooser.showOpenDialog(this);
         if (result == JFileChooser.APPROVE_OPTION) {
             java.io.File selectedFile = fileChooser.getSelectedFile();
-            System.out.println("Selected file: " + selectedFile.getAbsolutePath());
+            String content = readFile(selectedFile.getAbsolutePath());
+            if (content == null) {
+                return;
+            }
+            this.fs.createFile(selectedFile.getName());
+            this.fs.writeFile(selectedFile.getName(), content);
         }
+        this.updateTable(this.fs.getCurrentDirectory());
+        this.updateTree();
     }//GEN-LAST:event_copyRealVirtualButtonActionPerformed
 
     private void copyVirtualRealButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_copyVirtualRealButtonActionPerformed
@@ -330,12 +407,19 @@ public class FileSystemSimulatorGUI extends javax.swing.JFrame {
         int result = fileChooser.showSaveDialog(this);
         if (result == JFileChooser.APPROVE_OPTION) {
             java.io.File selectedFile = fileChooser.getSelectedFile();
+            TableModel model = this.fileTable.getModel();
+            String name = (String) model.getValueAt(fileTable.getSelectedRow(), 0);
+            String content = this.fs.readFile(name);
+            this.writeFile(selectedFile.getPath(), content);
             System.out.println("Save file: " + selectedFile.getAbsolutePath());
         }
     }//GEN-LAST:event_copyVirtualRealButtonActionPerformed
 
     private void copyVirtualVirtualButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_copyVirtualVirtualButtonActionPerformed
-        // TODO add your handling code here:
+        TableModel model = this.fileTable.getModel();
+        this.clipBoardFile = (String) model.getValueAt(fileTable.getSelectedRow(), 0);
+        this.clipboard = this.fs.readFile(clipBoardFile);
+        this.pasteButton.setEnabled(true);
     }//GEN-LAST:event_copyVirtualVirtualButtonActionPerformed
 
     private void moveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_moveButtonActionPerformed
@@ -343,13 +427,42 @@ public class FileSystemSimulatorGUI extends javax.swing.JFrame {
     }//GEN-LAST:event_moveButtonActionPerformed
 
     private void deleteButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteButtonActionPerformed
-        // TODO add your handling code here:
+        TableModel model = this.fileTable.getModel();
+        String name = (String) model.getValueAt(fileTable.getSelectedRow(), 0);
+        this.fs.deleteDirectory(name);
+        this.fs.deleteFile(name);
+        updateTable(this.fs.getCurrentDirectory());
+        updateTree();
     }//GEN-LAST:event_deleteButtonActionPerformed
 
     private void backButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backButtonActionPerformed
         this.fs.changeDirectory("..");
         this.updateTable(this.fs.getCurrentDirectory());
+        
+        previewTextArea.setText("");
+        previewTextArea.setEnabled(false);
+        saveButton.setEnabled(false);
+        cancelButton.setEnabled(false);
     }//GEN-LAST:event_backButtonActionPerformed
+
+    private void saveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_saveButtonActionPerformed
+        String content = this.previewTextArea.getText();
+        this.fs.writeFile(currentFile, content);
+        updateTable(fs.getCurrentDirectory());
+    }//GEN-LAST:event_saveButtonActionPerformed
+
+    private void cancelButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_cancelButtonActionPerformed
+        String content = fs.readFile(currentFile);
+        previewTextArea.setText(content);
+    }//GEN-LAST:event_cancelButtonActionPerformed
+
+    private void pasteButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pasteButtonActionPerformed
+        this.fs.createFile(this.clipBoardFile);
+        this.fs.writeFile(this.clipBoardFile, this.clipboard);
+        
+        this.updateTable(this.fs.getCurrentDirectory());
+        this.updateTree();
+    }//GEN-LAST:event_pasteButtonActionPerformed
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
@@ -382,19 +495,20 @@ public class FileSystemSimulatorGUI extends javax.swing.JFrame {
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton backButton;
+    private javax.swing.JButton cancelButton;
     private javax.swing.JButton copyRealVirtualButton;
     private javax.swing.JButton copyVirtualRealButton;
     private javax.swing.JButton copyVirtualVirtualButton;
     private javax.swing.JButton deleteButton;
     private javax.swing.JTable fileTable;
     private javax.swing.JTree fileTree;
-    private javax.swing.JButton jButton8;
     private javax.swing.JScrollPane jScrollPane1;
     private javax.swing.JScrollPane jScrollPane2;
     private javax.swing.JScrollPane jScrollPane3;
     private javax.swing.JButton moveButton;
     private javax.swing.JButton newDirectoryButton;
     private javax.swing.JButton newFileButton;
+    private javax.swing.JButton pasteButton;
     private javax.swing.JTextField pathTextField;
     private javax.swing.JTextArea previewTextArea;
     private javax.swing.JButton saveButton;

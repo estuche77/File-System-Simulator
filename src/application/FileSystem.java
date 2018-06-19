@@ -110,16 +110,6 @@ public class FileSystem {
         this.availability[sector] = true;
     }
     
-    private ArrayList<Integer> findAvailableSectors() {
-        ArrayList<Integer> emptySectors = new ArrayList<>();
-        for (int i = 0; i < this.sectorCount; i++) {
-            if (this.availability[i]) {
-                emptySectors.add(i);
-            }
-        }
-        return emptySectors;
-    }
-    
     public Directory getRoot() {
         return this.root;
     }
@@ -242,6 +232,10 @@ public class FileSystem {
         Directory currentDirectory = getCurrentDirectory();
         File file = currentDirectory.getFile(fileName);
         
+        if (file == null) {
+            return null;
+        }
+        
         ArrayList<Integer> sectors = file.getSectors();
         char data[] = getFileSystemDisk();
         int i = 0;
@@ -258,6 +252,9 @@ public class FileSystem {
         Directory currentDirectory = getCurrentDirectory();
         File file = currentDirectory.getFile(fileName);
         
+        if (file == null)
+            return;
+        
         ArrayList<Integer> sectors = file.getSectors();
         for (int sector: sectors) {
             this.deallocateSector(sector);
@@ -269,6 +266,9 @@ public class FileSystem {
     public void deleteDirectory(String dirName) {
         Directory currentDirectory = getCurrentDirectory();
         Directory toDelete = currentDirectory.getDirectory(dirName);
+        
+        if (toDelete == null)
+            return;
         
         changeDirectory(toDelete.getName());
         

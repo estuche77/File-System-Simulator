@@ -26,9 +26,9 @@ public class Directory extends Element {
     }
     
     public void deleteElement(String fileName) {
-        for (Element e: this.elements) {
-            if (e.getName().equals(fileName)) {
-                this.elements.remove(e);
+        for (int i = 0; i < this.elements.size(); i++) {
+            if (elements.get(i).getName().equals(fileName)) {
+                this.elements.remove(i);
             }
         }
     }

@@ -50,7 +50,7 @@ public class FileSystemSimulatorGUI extends javax.swing.JFrame {
     public FileSystemSimulatorGUI() {
         initComponents();
         this.fs = new FileSystem(FILE_PATH, SECTOR_COUNT, SECTOR_SIZE);
-        fillFileSystem();
+        // fillFileSystem();
         updateTree();
         updateTable(this.fs.getCurrentDirectory());
         

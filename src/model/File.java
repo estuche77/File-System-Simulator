@@ -41,7 +41,10 @@ public class File extends Element {
     }
     
     public String getFileExtension() {
-        String[] parts = this.name.split(".");
-        return parts[parts.length-1];
+        String[] parts = this.name.split("\\.");
+        if (parts.length > 0) {
+            return parts[parts.length-1];
+        }
+        return "";
     }
 }

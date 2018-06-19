@@ -1,7 +1,15 @@
 package filesystemsimulator;
 
 import application.FileSystem;
+import java.awt.Point;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.ArrayList;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableModel;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import model.Directory;
@@ -27,6 +35,24 @@ public class FileSystemSimulatorGUI extends javax.swing.JFrame {
         this.fs = new FileSystem(FILE_PATH, SECTOR_COUNT, SECTOR_SIZE);
         fillFileSystem();
         updateTree();
+        updateTable(this.fs.getRoot());
+        
+        // Taken from StackOverflow:
+        // https://stackoverflow.com/questions/14852719/double-click-listener-on-jtable-in-java/19586049#19586049
+        this.fileTable.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mousePressed(MouseEvent mouseEvent) {
+                JTable table = (JTable) mouseEvent.getSource();
+                Point point = mouseEvent.getPoint();
+                int row = table.rowAtPoint(point);
+                if (mouseEvent.getClickCount() == 2 && table.getSelectedRow() != -1) {
+                    TableModel model = table.getModel();
+                    String path = (String) model.getValueAt(row, 0);
+                    fs.changeDirectory(path);
+                    updateTable(fs.getCurrentDirectory());
+                }
+            }
+        });
     }
     
     private void fillFileSystem() {
@@ -62,6 +88,23 @@ public class FileSystemSimulatorGUI extends javax.swing.JFrame {
         return root;
     }
     
+    private void updateTable(Directory directory) {
+        DefaultTableModel model = (DefaultTableModel) this.fileTable.getModel();
+        model.setRowCount(0);
+        
+        ArrayList<Directory> directories = directory.getDirectories();
+        
+        for (Directory dir: directories) {
+            model.addRow(new Object[]{dir.getName(), dir.getModifiedDateTime(), "<DIR>", ""});
+        }
+        
+        ArrayList<File> files = directory.getFiles();
+        
+        for (File file: files) {
+            model.addRow(new Object[]{file.getName(), file.getModifiedDateTime(), file.getFileExtension(), file.getSize()});
+        }
+    }
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -94,22 +137,62 @@ public class FileSystemSimulatorGUI extends javax.swing.JFrame {
         setBackground(new java.awt.Color(255, 255, 255));
 
         backButton.setText("Back");
+        backButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                backButtonActionPerformed(evt);
+            }
+        });
 
         newDirectoryButton.setText("New Directory");
+        newDirectoryButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                newDirectoryButtonActionPerformed(evt);
+            }
+        });
 
         newFileButton.setText("New File");
+        newFileButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                newFileButtonActionPerformed(evt);
+            }
+        });
 
         copyRealVirtualButton.setText("Copy R-V");
+        copyRealVirtualButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                copyRealVirtualButtonActionPerformed(evt);
+            }
+        });
 
         copyVirtualRealButton.setText("Copy V-R");
+        copyVirtualRealButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                copyVirtualRealButtonActionPerformed(evt);
+            }
+        });
 
         copyVirtualVirtualButton.setText("Copy");
+        copyVirtualVirtualButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                copyVirtualVirtualButtonActionPerformed(evt);
+            }
+        });
 
         moveButton.setText("Move");
+        moveButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                moveButtonActionPerformed(evt);
+            }
+        });
 
         deleteButton.setText("Delete");
+        deleteButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                deleteButtonActionPerformed(evt);
+            }
+        });
 
-        jButton8.setText("jButton8");
+        jButton8.setText("Cancel");
 
         saveButton.setText("Save");
 
@@ -168,10 +251,11 @@ public class FileSystemSimulatorGUI extends javax.swing.JFrame {
                         .addComponent(copyVirtualVirtualButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(moveButton, javax.swing.GroupLayout.PREFERRED_SIZE, 73, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 23, Short.MAX_VALUE)
-                        .addComponent(deleteButton))
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(deleteButton)
+                        .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jScrollPane2)
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 116, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -206,15 +290,66 @@ public class FileSystemSimulatorGUI extends javax.swing.JFrame {
                         .addComponent(copyRealVirtualButton)
                         .addComponent(copyVirtualRealButton)
                         .addComponent(copyVirtualVirtualButton)
-                        .addComponent(moveButton))
+                        .addComponent(moveButton)
+                        .addComponent(deleteButton))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(jButton8)
-                        .addComponent(saveButton)
-                        .addComponent(deleteButton))))
+                        .addComponent(saveButton))))
         );
 
         pack();
     }// </editor-fold>//GEN-END:initComponents
+
+    private void newDirectoryButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_newDirectoryButtonActionPerformed
+        String path = JOptionPane.showInputDialog("New directory name");
+        this.fs.makeDirectory(path);
+        this.updateTree();
+        this.updateTable(this.fs.getCurrentDirectory());
+    }//GEN-LAST:event_newDirectoryButtonActionPerformed
+
+    private void newFileButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_newFileButtonActionPerformed
+        String path = JOptionPane.showInputDialog("New file name");
+        this.fs.createFile(path);
+        this.updateTree();
+        this.updateTable(this.fs.getCurrentDirectory());
+    }//GEN-LAST:event_newFileButtonActionPerformed
+
+    private void copyRealVirtualButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_copyRealVirtualButtonActionPerformed
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setCurrentDirectory(new java.io.File(System.getProperty("user.home")));
+        int result = fileChooser.showOpenDialog(this);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            java.io.File selectedFile = fileChooser.getSelectedFile();
+            System.out.println("Selected file: " + selectedFile.getAbsolutePath());
+        }
+    }//GEN-LAST:event_copyRealVirtualButtonActionPerformed
+
+    private void copyVirtualRealButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_copyVirtualRealButtonActionPerformed
+        JFileChooser fileChooser = new JFileChooser();
+        fileChooser.setCurrentDirectory(new java.io.File(System.getProperty("user.home")));
+        int result = fileChooser.showSaveDialog(this);
+        if (result == JFileChooser.APPROVE_OPTION) {
+            java.io.File selectedFile = fileChooser.getSelectedFile();
+            System.out.println("Save file: " + selectedFile.getAbsolutePath());
+        }
+    }//GEN-LAST:event_copyVirtualRealButtonActionPerformed
+
+    private void copyVirtualVirtualButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_copyVirtualVirtualButtonActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_copyVirtualVirtualButtonActionPerformed
+
+    private void moveButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_moveButtonActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_moveButtonActionPerformed
+
+    private void deleteButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_deleteButtonActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_deleteButtonActionPerformed
+
+    private void backButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_backButtonActionPerformed
+        this.fs.changeDirectory("..");
+        this.updateTable(this.fs.getCurrentDirectory());
+    }//GEN-LAST:event_backButtonActionPerformed
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">

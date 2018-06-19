@@ -55,10 +55,6 @@ public class FileSystem {
         }
     }
     
-    private Directory getCurrentDirectory() {
-        return this.directoryStack.peek();
-    }
-    
     private void popDirectory() {
         this.directoryStack.pop();
         if (this.directoryStack.empty()) {
@@ -126,6 +122,10 @@ public class FileSystem {
     
     public Directory getRoot() {
         return this.root;
+    }
+    
+    public Directory getCurrentDirectory() {
+        return this.directoryStack.peek();
     }
     
     public ArrayList<Integer> findAvailableSectorsHARD() {

@@ -94,4 +94,12 @@ public class Directory extends Element {
     public void pasteElement(Element element) {
         this.elements.add(element);
     }
+    
+    public void renameElement(String fileName, String newName) {
+        for (Element e: this.elements) {
+            if (e.getName().equals(fileName)) {
+                e.setName(newName);
+            }
+        }
+    }
 }

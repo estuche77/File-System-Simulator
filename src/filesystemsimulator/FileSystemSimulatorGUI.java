@@ -4,7 +4,6 @@ import application.FileSystem;
 import java.awt.Point;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
@@ -187,6 +186,7 @@ public class FileSystemSimulatorGUI extends javax.swing.JFrame {
         jScrollPane3 = new javax.swing.JScrollPane();
         fileTable = new javax.swing.JTable();
         pasteButton = new javax.swing.JButton();
+        renameButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.EXIT_ON_CLOSE);
         setBackground(new java.awt.Color(255, 255, 255));
@@ -263,6 +263,7 @@ public class FileSystemSimulatorGUI extends javax.swing.JFrame {
 
         previewTextArea.setColumns(20);
         previewTextArea.setRows(5);
+        previewTextArea.setEnabled(false);
         jScrollPane1.setViewportView(previewTextArea);
 
         javax.swing.tree.DefaultMutableTreeNode treeNode1 = new javax.swing.tree.DefaultMutableTreeNode("root");
@@ -295,9 +296,17 @@ public class FileSystemSimulatorGUI extends javax.swing.JFrame {
         jScrollPane3.setViewportView(fileTable);
 
         pasteButton.setText("Paste");
+        pasteButton.setEnabled(false);
         pasteButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 pasteButtonActionPerformed(evt);
+            }
+        });
+
+        renameButton.setText("Rename");
+        renameButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                renameButtonActionPerformed(evt);
             }
         });
 
@@ -326,10 +335,12 @@ public class FileSystemSimulatorGUI extends javax.swing.JFrame {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(pasteButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(renameButton)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(deleteButton)
                         .addGap(0, 0, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 215, Short.MAX_VALUE)
+                        .addComponent(jScrollPane2, javax.swing.GroupLayout.DEFAULT_SIZE, 268, Short.MAX_VALUE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(jScrollPane3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -338,7 +349,7 @@ public class FileSystemSimulatorGUI extends javax.swing.JFrame {
                         .addComponent(cancelButton, javax.swing.GroupLayout.PREFERRED_SIZE, 81, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(saveButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 275, Short.MAX_VALUE)
+                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 328, Short.MAX_VALUE)
                     .addComponent(searchTextField))
                 .addContainerGap())
         );
@@ -366,6 +377,7 @@ public class FileSystemSimulatorGUI extends javax.swing.JFrame {
                         .addComponent(copyVirtualVirtualButton)
                         .addComponent(moveButton)
                         .addComponent(pasteButton)
+                        .addComponent(renameButton)
                         .addComponent(deleteButton))
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                         .addComponent(cancelButton)
@@ -475,8 +487,7 @@ public class FileSystemSimulatorGUI extends javax.swing.JFrame {
 
     private void pasteButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_pasteButtonActionPerformed
         if (copy) {
-            this.fs.createFile(this.clipBoardFile);
-            this.fs.writeFile(this.clipBoardFile, this.clipboard);
+            this.fs.createFile(this.clipBoardFile, this.clipboard);
         } else {
             this.fs.getCurrentDirectory().pasteElement(elementClipboard);
         }
@@ -484,6 +495,15 @@ public class FileSystemSimulatorGUI extends javax.swing.JFrame {
         this.updateTable(this.fs.getCurrentDirectory());
         this.updateTree();
     }//GEN-LAST:event_pasteButtonActionPerformed
+
+    private void renameButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_renameButtonActionPerformed
+        TableModel model = this.fileTable.getModel();
+        String oldName = (String) model.getValueAt(fileTable.getSelectedRow(), 0);
+        String newName = JOptionPane.showInputDialog("New name");
+        this.fs.getCurrentDirectory().renameElement(oldName, newName);
+        updateTable(this.fs.getCurrentDirectory());
+        updateTree();
+    }//GEN-LAST:event_renameButtonActionPerformed
     public static void main(String args[]) {
         /* Set the Nimbus look and feel */
         //<editor-fold defaultstate="collapsed" desc=" Look and feel setting code (optional) ">
@@ -532,6 +552,7 @@ public class FileSystemSimulatorGUI extends javax.swing.JFrame {
     private javax.swing.JButton pasteButton;
     private javax.swing.JTextField pathTextField;
     private javax.swing.JTextArea previewTextArea;
+    private javax.swing.JButton renameButton;
     private javax.swing.JButton saveButton;
     private javax.swing.JTextField searchTextField;
     // End of variables declaration//GEN-END:variables

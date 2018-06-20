@@ -48,11 +48,13 @@
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="pasteButton" min="-2" max="-2" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
+                      <Component id="renameButton" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace max="-2" attributes="0"/>
                       <Component id="deleteButton" min="-2" max="-2" attributes="0"/>
                       <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                   </Group>
                   <Group type="102" alignment="0" attributes="0">
-                      <Component id="jScrollPane2" pref="215" max="32767" attributes="0"/>
+                      <Component id="jScrollPane2" pref="268" max="32767" attributes="0"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="jScrollPane3" min="-2" max="-2" attributes="0"/>
                   </Group>
@@ -64,7 +66,7 @@
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="saveButton" max="32767" attributes="0"/>
                   </Group>
-                  <Component id="jScrollPane1" alignment="0" pref="275" max="32767" attributes="0"/>
+                  <Component id="jScrollPane1" alignment="0" pref="328" max="32767" attributes="0"/>
                   <Component id="searchTextField" max="32767" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
@@ -98,6 +100,7 @@
                       <Component id="copyVirtualVirtualButton" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="moveButton" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="pasteButton" alignment="3" min="-2" max="-2" attributes="0"/>
+                      <Component id="renameButton" alignment="3" min="-2" max="-2" attributes="0"/>
                       <Component id="deleteButton" alignment="3" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <Group type="103" alignment="1" groupAlignment="3" attributes="0">
@@ -205,6 +208,7 @@
           <Properties>
             <Property name="columns" type="int" value="20"/>
             <Property name="rows" type="int" value="5"/>
+            <Property name="enabled" type="boolean" value="false"/>
           </Properties>
         </Component>
       </SubComponents>
@@ -276,9 +280,18 @@
     <Component class="javax.swing.JButton" name="pasteButton">
       <Properties>
         <Property name="text" type="java.lang.String" value="Paste"/>
+        <Property name="enabled" type="boolean" value="false"/>
       </Properties>
       <Events>
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="pasteButtonActionPerformed"/>
+      </Events>
+    </Component>
+    <Component class="javax.swing.JButton" name="renameButton">
+      <Properties>
+        <Property name="text" type="java.lang.String" value="Rename"/>
+      </Properties>
+      <Events>
+        <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="renameButtonActionPerformed"/>
       </Events>
     </Component>
   </SubComponents>

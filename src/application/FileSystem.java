@@ -185,6 +185,22 @@ public class FileSystem {
         }
     }
     
+    public void createFile(String fileName, String content) {
+        Directory currentDirectory = getCurrentDirectory();
+        if (!currentDirectory.existsElement(fileName)) {
+            File newFile = new File(fileName, DateTime.now());
+            
+            int neededSectors = (int)Math.ceil((float)content.length() / (float)sectorSize);
+            
+            if (this.freeSectors() >= neededSectors) {
+                int firstSector = allocateNextFreeSector();
+                newFile.allocateSector(firstSector);
+                currentDirectory.addFile(newFile);
+                writeFile(fileName, content);
+            }
+        }
+    }
+    
     public void writeFile(String fileName, String content) {
         
         Directory currentDirectory = getCurrentDirectory();
